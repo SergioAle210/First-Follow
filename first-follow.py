@@ -60,9 +60,63 @@ def compute_first(grammar):
     return first
 
 
+def compute_follow(grammar, first, start_symbol):
+    # Inicializamos FOLLOW para cada no terminal
+    follow = {nonterm: set() for nonterm in grammar}
+    # Regla 1: Si es el símbolo inicial, agregar '$'
+    follow[start_symbol].add("$")
+
+    changed = True
+    while changed:
+        changed = False
+        # Para cada producción B -> α
+        for left in grammar:
+            for production in grammar[left]:
+                # Recorremos la producción para buscar apariciones de no terminales
+                for i, symbol in enumerate(production):
+                    # Solo se calcula FOLLOW para no terminales (y se ignora 'λ')
+                    if symbol in grammar and symbol != "λ":
+                        beta = production[i + 1 :]
+                        # Regla 2: Si hay beta, agregar FIRST(beta) sin 'λ'
+                        first_beta = set()
+                        for b in beta:
+                            if b not in grammar:  # b es terminal
+                                first_beta.add(b)
+                                break
+                            else:
+                                first_beta.update(first[b] - {"λ"})
+                                if "λ" in first[b]:
+                                    continue
+                                else:
+                                    break
+                        before = len(follow[symbol])
+                        follow[symbol].update(first_beta)
+                        if len(follow[symbol]) > before:
+                            changed = True
+
+                        # Regla 3: Si beta es vacío o beta =>* λ, se añade FOLLOW(B) (FOLLOW(left))
+                        # La condición se cumple si beta está vacía o, para cada símbolo en beta,
+                        # éste es no terminal y puede derivar la cadena vacía.
+                        if not beta or (
+                            beta and all(b in grammar and "λ" in first[b] for b in beta)
+                        ):
+                            before = len(follow[symbol])
+                            follow[symbol].update(follow[left])
+                            if len(follow[symbol]) > before:
+                                changed = True
+    return follow
+
+
 first = compute_first(grammar)
+# Cálculo de FIRST y FOLLOW para la gramática dada
+follow = compute_follow(grammar, first, "E")
 
 
 print("Conjuntos FIRST:")
 for nonterm in first:
     print(f"{nonterm}: {first[nonterm]}")
+
+
+print("\nConjuntos FOLLOW:")
+for nonterm in follow:
+    print(f"{nonterm}: {follow[nonterm]}")
