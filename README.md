@@ -4,19 +4,7 @@ Este programa implementa el análisis de una gramática libre de contexto para e
 
 ## Gramática Utilizada
 
-La gramática que se analiza representa expresiones aritméticas con suma, multiplicación, paréntesis e identificadores. Se define así:
-
-$$
-\begin{align*}
-E &\rightarrow T\ E' \\
-E' &\rightarrow +\ T\ E'\ |\ \lambda \\
-T &\rightarrow F\ T' \\
-T' &\rightarrow *\ F\ T'\ |\ \lambda \\
-F &\rightarrow (E)\ |\ id
-\end{align*}
-$$
-
-> Donde \( \lambda \) representa la cadena vacía.
+La gramática que se analiza representa expresiones aritméticas con suma, multiplicación, paréntesis e identificadores.
 
 Esta gramática se representa en el código mediante un diccionario en Python, donde cada no terminal está asociado con sus producciones.
 
